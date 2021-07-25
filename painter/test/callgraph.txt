@@ -1,0 +1,4 @@
+ClassA::func_1
+  ClassB::func_2
+    ClassD::func_4
+  ClassC::func_3
