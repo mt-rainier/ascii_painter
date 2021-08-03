@@ -1,4 +1,4 @@
-ClassA::func_1
-  ClassB::func_2
+ClassAHasALongNameAsWellAndLongerLongerLonger::func_1
+  ClassB::func_2_with_a_very_long_name
     ClassD::func_4
-  ClassC::func_3
+  ClassCNameSuperLongLongLongLongLongLongLongLongLongLongLongLong::func_3_long_name_cross_life_lines

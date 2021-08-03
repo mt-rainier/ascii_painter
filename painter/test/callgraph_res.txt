@@ -1,0 +1,20 @@
+    ┌───────────────────┐    ┌──────┐    ┌──────┐    ┌───────────────────┐
+    │ClassAHasALongNameA│    │ClassB│    │ClassD│    │ClassCNameSuperLong│
+    │sWellAndLongerLonge│    └──────┘    └──────┘    │LongLongLongLongLon│
+    │rLonger            │       │           │        │gLongLongLongLongLo│
+    └───────────────────┘       │           │        │ngLong             │
+              │                 │           │        └───────────────────┘
+              │                 │           │                  │          
+ func_1       │                 │           │                  │          
+─────────────►│                 │           │                  │          
+              │                 │           │                  │          
+              │ func_2_with_a_  │           │                  │          
+              │ very_long_name  │           │                  │          
+              │────────────────►│           │                  │          
+              │                 │           │                  │          
+              │                 │ func_4    │                  │          
+              │                 │──────────►│                  │          
+              │                 │           │                  │          
+              │ func_3_long_name_cross_life_lines              │          
+              │───────────────────────────────────────────────►│          
+              │                 │           │                  │          

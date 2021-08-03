@@ -65,20 +65,32 @@ impl Canvas {
         self.change_pixel(vertex, c);
     }
 
-    pub fn draw_line(&mut self, a: &Vertex, b: &Vertex) -> Line {
+    fn draw_line_overwrite_or_not(&mut self, a: &Vertex, b: &Vertex, overwrite: bool) -> Line {
         if a.1 != b.1 {
             for j in (min(a.1, b.1) + 1)..(max(a.1, b.1)) {
-                self.change_pixel(&(a.0, j), '─');
+                if self.buffer[a.0][j] == ' ' || overwrite {
+                    self.change_pixel(&(a.0, j), '─');
+                }
             }
         } else if a.0 != b.0 {
             for j in (min(a.0, b.0) + 1)..(max(a.0, b.0)) {
-                self.change_pixel(&(j, a.1), '│');
+                if self.buffer[j][a.1] == ' ' || overwrite {
+                    self.change_pixel(&(j, a.1), '│');
+                }
             }
         }
         Line {
             start: a.to_owned(),
             end: b.to_owned(),
         }
+    }
+
+    pub fn draw_line(&mut self, a: &Vertex, b: &Vertex) -> Line {
+        self.draw_line_overwrite_or_not(a, b, true)
+    }
+
+    pub fn draw_line_under(&mut  self, a: &Vertex, b: &Vertex) -> Line {
+        self.draw_line_overwrite_or_not(a, b, false)
     }
 
     pub fn draw_arrowed_line(&mut self, start: &Vertex, end: &Vertex) -> Line {
@@ -197,7 +209,7 @@ impl Canvas {
         let label_rec = Rectangle {
             left: a.1 + 1,
             right: b.1 - 1,
-            top: a.0 - 1 - (label.len() - 1) / (b.1 - a.1 - 1) - 1,
+            top: a.0 - 1 - (label.len() - 1) / (b.1 - a.1 - 3) - 1,
             bottom: a.0,
         };
         self.write_label_within_rec(&label_rec, label);
@@ -254,35 +266,65 @@ impl Canvas {
 #[cfg(test)]
 mod test {
 
-use std::fs;
-use super::*;
+    use super::*;
+    use std::fs;
 
-#[test]
-fn test_rec_with_label() {
-    let mut canvas = Canvas::new(20, 20);
-    canvas.draw_rectangle_with_label(&[(1, 1), (1, 8), (5, 1), (5, 8)], "test");
-    canvas.draw_rectangle_with_label(&[(6, 1), (6, 8), (10, 1), (10, 8)], "test a super long label");
-    canvas.reset_boundary();
-    let res = fs::read_to_string("./test/rec_with_label.txt").unwrap();
-    assert_eq!(canvas.to_string(), res);
-}
+    #[test]
+    fn test_rec_with_label() {
+        let mut canvas = Canvas::new(20, 20);
+        canvas.draw_rectangle_with_label(
+            &Rectangle {
+                left: 1,
+                right: 8,
+                top: 1,
+                bottom: 5,
+            },
+            "test",
+        );
+        canvas.draw_rectangle_with_label(
+            &Rectangle {
+                left: 1,
+                right: 8,
+                top: 6,
+                bottom: 10,
+            },
+            "test a super long label",
+        );
+        canvas.reset_boundary();
+        let res = fs::read_to_string("./test/rec_with_label.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
 
-#[test]
-fn test_arrowed_line() {
-    let mut canvas = Canvas::new(20, 20);
-    canvas.draw_arrowed_line(&(10, 10), &(10, 18));
-    canvas.reset_boundary();
-    let res = fs::read_to_string("./test/arrowed_line.txt").unwrap();
-    assert_eq!(canvas.to_string(), res);
-}
+    #[test]
+    fn test_arrowed_line() {
+        let mut canvas = Canvas::new(20, 20);
+        canvas.draw_arrowed_line(&(10, 10), &(10, 18));
+        canvas.reset_boundary();
+        let res = fs::read_to_string("./test/arrowed_line.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
 
-#[test]
-fn test_line_with_label() {
-    let mut canvas = Canvas::new(20, 20);
-    canvas.draw_horizontal_line_with_label((10, 10), (10, 18), "func_call_name", true);
-    canvas.draw_horizontal_line_with_label((15, 10), (15, 18), "func_call_name", false);
-    canvas.reset_boundary();
-    let res = fs::read_to_string("./test/line_with_label.txt").unwrap();
-    assert_eq!(canvas.to_string(), res);
-}
+    #[test]
+    fn test_line_with_label() {
+        let mut canvas = Canvas::new(20, 20);
+        canvas.draw_horizontal_line_with_label((10, 10), (10, 18), "func_call_name", true);
+        canvas.draw_horizontal_line_with_label((15, 10), (15, 18), "func_call_name", false);
+        canvas.reset_boundary();
+        let res = fs::read_to_string("./test/line_with_label.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
+
+    #[test]
+    fn test_line_with_long_label() {
+        let mut canvas = Canvas::new(20, 20);
+        canvas.draw_horizontal_line_with_label(
+            (15, 10),
+            (15, 18),
+            "func_call_name_really_long",
+            false,
+        );
+        canvas.reset_boundary();
+        let res = fs::read_to_string("./test/line_with_long_label.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
 }
