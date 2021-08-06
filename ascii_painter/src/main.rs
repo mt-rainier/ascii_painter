@@ -1,6 +1,6 @@
-use std::io::{self, Read};
 use canvas::Canvas;
 use painter::Painter;
+use std::io::{self, Read};
 
 fn main() -> io::Result<()> {
     let mut buffer = String::new();

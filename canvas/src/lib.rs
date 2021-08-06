@@ -1,5 +1,5 @@
 use std::cmp::{max, min};
-use std::str;
+use std::{mem, str};
 
 type Vertex = (usize, usize);
 
@@ -89,7 +89,7 @@ impl Canvas {
         self.draw_line_overwrite_or_not(a, b, true)
     }
 
-    pub fn draw_line_under(&mut  self, a: &Vertex, b: &Vertex) -> Line {
+    pub fn draw_line_under(&mut self, a: &Vertex, b: &Vertex) -> Line {
         self.draw_line_overwrite_or_not(a, b, false)
     }
 
@@ -169,15 +169,8 @@ impl Canvas {
         }
     }
 
-    pub fn draw_rectangle_with_vertices(&mut self, vertices: &[Vertex]) -> Rectangle {
-        let rec = self.rec_from_vertices(vertices);
-        self.draw_rectangle(&rec);
-
-        rec
-    }
-
     pub fn draw_rectangle_with_vertices_label(&mut self, vertices: &[Vertex], label: &str) {
-        let rec = self.draw_rectangle_with_vertices(vertices);
+        let rec = self.rec_from_vertices(vertices);
         self.write_label_within_rec(&rec, label);
     }
 
@@ -186,33 +179,42 @@ impl Canvas {
         self.write_label_within_rec(rec, label);
     }
 
-    pub fn draw_horizontal_line_with_label(
+    pub fn draw_line_with_label(
         &mut self,
         mut a: Vertex,
         mut b: Vertex,
         label: &str,
         arrowed: bool,
     ) {
-        if a.0 != b.0 {
-            return;
-        }
         if arrowed {
             self.draw_arrowed_line(&a, &b);
         } else {
             self.draw_line(&a, &b);
         }
-        if a.1 > b.1 {
-            let tmp = a.1;
-            a.1 = b.1;
-            b.1 = tmp;
+        if a.1 != b.1 {
+            if a.1 > b.1 {
+                mem::swap(&mut a.1, &mut b.1);
+            }
+            let label_rec = Rectangle {
+                left: a.1 + 1,
+                right: b.1 - 1,
+                top: a.0 - 1 - (label.len() - 1) / (b.1 - a.1 - 3) - 1,
+                bottom: a.0,
+            };
+            self.write_label_within_rec(&label_rec, label);
+        } else if a.0 != b.0 {
+            if a.0 > b.0 {
+                mem::swap(&mut a.0, &mut b.0);
+            }
+            let width = (label.len() - 1) / (b.0 - a.0 - 3) + 1;
+            let label_rec = Rectangle {
+                left: a.1 - width / 2 - 1,
+                right: b.1 + width / 2 + 1,
+                top: a.0 + 1,
+                bottom: b.0 - 1,
+            };
+            self.write_label_within_rec(&label_rec, label);
         }
-        let label_rec = Rectangle {
-            left: a.1 + 1,
-            right: b.1 - 1,
-            top: a.0 - 1 - (label.len() - 1) / (b.1 - a.1 - 3) - 1,
-            bottom: a.0,
-        };
-        self.write_label_within_rec(&label_rec, label);
     }
 
     pub fn reset_boundary(&mut self) {
@@ -307,8 +309,8 @@ mod test {
     #[test]
     fn test_line_with_label() {
         let mut canvas = Canvas::new(20, 20);
-        canvas.draw_horizontal_line_with_label((10, 10), (10, 18), "func_call_name", true);
-        canvas.draw_horizontal_line_with_label((15, 10), (15, 18), "func_call_name", false);
+        canvas.draw_line_with_label((10, 10), (10, 18), "func_call_name", true);
+        canvas.draw_line_with_label((15, 10), (15, 18), "func_call_name", false);
         canvas.reset_boundary();
         let res = fs::read_to_string("./test/line_with_label.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
@@ -317,7 +319,7 @@ mod test {
     #[test]
     fn test_line_with_long_label() {
         let mut canvas = Canvas::new(20, 20);
-        canvas.draw_horizontal_line_with_label(
+        canvas.draw_line_with_label(
             (15, 10),
             (15, 18),
             "func_call_name_really_long",

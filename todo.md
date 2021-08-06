@@ -4,3 +4,4 @@
 [x] autosize arrowed line label
 [] support new line '\n' in label
 [] remove tailing spaces
+[x] support calling itself

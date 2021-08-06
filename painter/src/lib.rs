@@ -1,82 +1,18 @@
 use canvas::*;
-use std::{cmp::{max, min}, collections::{HashMap, HashSet}};
+use std::{
+    cmp::{max, min},
+    collections::HashMap,
+};
 
-/// Component and its function name
-type Function = (String, String);
-/// Component and the function it's calling
-type FunctionCall = (String, Function);
-
-struct CallGraph {
-    components: HashMap<String, HashSet<String>>,
-    components_in_order: Vec<String>,
-    func_calls: Vec<FunctionCall>,
-}
-
-impl CallGraph {
-    fn new(callgraph: &str) -> Self {
-        let mut ret = CallGraph {
-            components: HashMap::new(),
-            components_in_order: Vec::new(),
-            func_calls: Vec::new(),
-        };
-
-        let mut function_stack: Vec<(String, usize)> = Vec::new();
-        let mut last_component = String::new();
-        let mut last_function = String::new();
-        let mut last_depth = 0;
-        for line in callgraph.split('\n') {
-            let parts: Vec<&str> = line.split("::").collect();
-            if parts.len() < 2 {
-                continue;
-            }
-
-            let mut curr_component = parts[0].to_string();
-            curr_component.retain(|c: char| !c.is_whitespace());
-            let mut curr_func_call = parts[1].to_string();
-            curr_func_call.retain(|c: char| !c.is_whitespace());
-
-            ret.add_component_func(&curr_component, &curr_func_call);
-
-            let non_space_pos = line.find(|c: char| !c.is_whitespace()).unwrap_or(0);
-            if non_space_pos > last_depth && !last_component.is_empty() && !last_function.is_empty()
-            {
-                function_stack.push((last_component, last_depth));
-            } else if non_space_pos < last_depth {
-                function_stack.pop();
-            }
-
-            let (calling_component, _) = function_stack
-                .last()
-                .unwrap_or(&(String::from(""), 0))
-                .clone();
-            ret.func_calls.push((
-                calling_component,
-                (curr_component.clone(), curr_func_call.clone()),
-            ));
-
-            last_component = curr_component;
-            last_function = curr_func_call;
-            last_depth = non_space_pos;
-        }
-
-        ret
-    }
-
-    fn add_component_func(&mut self, component: &str, func: &str) {
-        if !self.components.contains_key(component) {
-            self.components_in_order.push(component.to_string());
-        }
-        let set = self
-            .components
-            .entry(component.to_owned())
-            .or_insert(HashSet::new());
-        set.insert(func.to_owned());
-    }
-}
+mod callgraph;
+use callgraph::{CallGraph, FunctionCall};
 
 pub struct Painter {
     components: HashMap<String, Rectangle>,
 }
+
+const EXTRA_VERTICAL_MARGIN: usize = 2;
+const DEFAULT_SELF_CALL_WIDTH: usize = 5;
 
 impl Painter {
     pub fn new() -> Self {
@@ -103,50 +39,128 @@ impl Painter {
         }
     }
 
-    fn draw_function_calls(&mut self, canvas: &mut Canvas, callgraph: &CallGraph) -> usize {
-        let extra_vertical_margin = 2;
+    fn draw_cross_component_call(
+        &self,
+        canvas: &mut Canvas,
+        f: &FunctionCall,
+        mut bottom_boundary: usize,
+    ) -> usize {
+        let virtual_rec = Rectangle {
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+        };
 
+        let component = f.0.to_owned();
+        let func = f.1.to_owned();
+
+        let called_rec = self.components.get(&func.0).unwrap();
+        let calling_rec = self.components.get(&component).unwrap_or(&virtual_rec);
+
+        let calling_center = (calling_rec.left + calling_rec.right) / 2;
+        let mut called_center = (called_rec.left + called_rec.right) / 2;
+
+        // space for arrow
+        if calling_center < called_center {
+            called_center = called_center - 1;
+        } else {
+            called_center = called_center + 1;
+        }
+
+        let label_height = (func.1.len() - 1)
+            / (max(called_center, calling_center) - min(called_center, calling_center) - 1)
+            + 1;
+
+        bottom_boundary += EXTRA_VERTICAL_MARGIN;
+
+        canvas.draw_line_with_label(
+            (
+                bottom_boundary + label_height,
+                calling_center,
+            ),
+            (
+                bottom_boundary + label_height,
+                called_center,
+            ),
+            &func.1,
+            true,
+        );
+
+        bottom_boundary + label_height
+    }
+
+    fn draw_same_component_call(
+        &self,
+        canvas: &mut Canvas,
+        f: &FunctionCall,
+        mut bottom_boundary: usize,
+    ) -> usize {
+        let func = f.1.to_owned();
+
+        let called_rec = self.components.get(&func.0).unwrap();
+
+        let called_center = (called_rec.left + called_rec.right) / 2;
+
+        bottom_boundary += EXTRA_VERTICAL_MARGIN;
+
+        canvas.draw_line(
+            &(bottom_boundary, called_center),
+            &(
+                bottom_boundary,
+                called_center + DEFAULT_SELF_CALL_WIDTH,
+            ),
+        );
+
+        canvas.draw_point(&(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH), '┐');
+
+        let label_height = (func.1.len() - 1)
+            / (DEFAULT_SELF_CALL_WIDTH)
+            + 1;
+
+        canvas.draw_line_with_label(
+            (
+                bottom_boundary,
+                called_center + DEFAULT_SELF_CALL_WIDTH,
+            ),
+            (
+                bottom_boundary + label_height + 2,
+                called_center + DEFAULT_SELF_CALL_WIDTH,
+            ),
+            &func.1,
+            false,
+        );
+
+        bottom_boundary += label_height + 2;
+
+        canvas.draw_arrowed_line(
+            &(
+                bottom_boundary,
+                called_center + DEFAULT_SELF_CALL_WIDTH,
+            ),
+            &(bottom_boundary, called_center + 1),
+        );
+
+        canvas.draw_point(&(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH), '┘');
+
+        bottom_boundary
+    }
+
+    fn draw_function_calls(&self, canvas: &mut Canvas, callgraph: &CallGraph) -> usize {
         let mut bottom_boundary = 0;
         for (_component_label, rec) in &self.components {
             bottom_boundary = max(bottom_boundary, rec.bottom);
         }
 
-        let virtual_rec = Rectangle {
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-            };
         for f in &callgraph.func_calls {
-            let component = f.0.to_owned();
-            let func = f.1.to_owned();
-
-            let called_rec = self.components.get(&func.0).unwrap();
-            let calling_rec = self.components.get(&component).unwrap_or(&virtual_rec);
-
-            let calling_center = (calling_rec.left + calling_rec.right) / 2;
-            let mut called_center = (called_rec.left + called_rec.right) / 2;
-
-            // space for arrow
-            if calling_center < called_center {
-                called_center = called_center - 1;
+            if !f.0.eq(&f.1 .0) {
+                bottom_boundary = self.draw_cross_component_call(canvas, f, bottom_boundary);
             } else {
-                called_center = called_center + 1;
+                bottom_boundary = self.draw_same_component_call(canvas, f, bottom_boundary);
             }
-
-            let label_height = (func.1.len() - 1)/ (max(called_center, calling_center) - min(called_center, calling_center) - 1) + 1;
-
-            canvas.draw_horizontal_line_with_label(
-                (bottom_boundary + label_height + extra_vertical_margin, calling_center),
-                (bottom_boundary + label_height + extra_vertical_margin, called_center),
-                &func.1,
-                true,
-            );
-
-            bottom_boundary = bottom_boundary + extra_vertical_margin + label_height;
         }
         // return the expected bottom of the lifecycle line
-        bottom_boundary + extra_vertical_margin
+        bottom_boundary + EXTRA_VERTICAL_MARGIN
     }
 
     fn draw_lifecycle_line(
@@ -189,6 +203,22 @@ mod test {
 
         canvas.reset_boundary();
         let res = fs::read_to_string("./test/callgraph_res.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
+
+    #[test]
+    fn test_callgraph_self_call() {
+        let txt = fs::read_to_string("./test/callgraph_self_call.txt").unwrap();
+
+        let mut canvas = Canvas::new(500, 500);
+
+        let mut painter = Painter::new();
+
+        painter.draw(&mut canvas, &txt);
+
+        canvas.reset_boundary();
+        canvas.print();
+        let res = fs::read_to_string("./test/callgraph_self_call_res.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
     }
 }
