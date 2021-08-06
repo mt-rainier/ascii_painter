@@ -186,9 +186,7 @@ impl Painter {
 #[cfg(test)]
 mod test {
     use std::fs;
-
     use canvas::Canvas;
-
     use super::*;
 
     #[test]
@@ -219,6 +217,22 @@ mod test {
         canvas.reset_boundary();
         canvas.print();
         let res = fs::read_to_string("./test/callgraph_self_call_res.txt").unwrap();
+        assert_eq!(canvas.to_string(), res);
+    }
+
+    #[test]
+    fn test_callgraph_multi_section() {
+        let txt = fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
+
+        let mut canvas = Canvas::new(500, 500);
+
+        let mut painter = Painter::new();
+
+        painter.draw(&mut canvas, &txt);
+
+        canvas.reset_boundary();
+        canvas.print();
+        let res = fs::read_to_string("./test/callgraph_multi_section_res.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
     }
 }
