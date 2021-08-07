@@ -26,12 +26,12 @@ impl Painter {
         let max_rec_width = 20;
         let horizontal_gap = 5;
         for component in &callgraph.components_in_order {
-            let width = min(max_rec_width, component.len() + 1);
+            let width = min(max_rec_width, component.len());
             let rec = Rectangle {
                 left: horizontal_gap + right_boundary,
-                right: width + horizontal_gap + right_boundary,
+                right: width + 1 + horizontal_gap + right_boundary,
                 top: 1,
-                bottom: (component.len() - 1) / max_rec_width + 3,
+                bottom: (component.len() - 1) / width + 3,
             };
             canvas.draw_rectangle_with_label(&rec, &component);
             right_boundary = rec.right;
@@ -200,6 +200,7 @@ mod test {
         painter.draw(&mut canvas, &txt);
 
         canvas.reset_boundary();
+        canvas.print();
         let res = fs::read_to_string("./test/callgraph_res.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
     }

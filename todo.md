@@ -7,3 +7,4 @@
 - [x] support calling function of the same component
 - [x] support component that doesn't have a function call and support multiple sections of callgraph
 - [ ] support return message
+- [ ] break new line by words

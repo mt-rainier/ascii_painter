@@ -1,20 +1,20 @@
-    ┌───────────────────┐    ┌──────┐    ┌──────┐    ┌───────────────────┐
-    │ClassAHasALongNameA│    │ClassB│    │ClassD│    │ClassCNameSuperLong│
-    │sWellAndLongerLonge│    └──────┘    └──────┘    │LongLongLongLongLon│
-    │rLonger            │       │           │        │gLongLongLongLongLo│
-    └───────────────────┘       │           │        │ngLong             │
-              │                 │           │        └───────────────────┘
-              │                 │           │                  │          
- func_1       │                 │           │                  │          
-─────────────►│                 │           │                  │          
-              │                 │           │                  │          
-              │ func_2_with_a_  │           │                  │          
-              │ very_long_name  │           │                  │          
-              │────────────────►│           │                  │          
-              │                 │           │                  │          
-              │                 │ func_4    │                  │          
-              │                 │──────────►│                  │          
-              │                 │           │                  │          
-              │ func_3_long_name_cross_life_lines              │          
-              │───────────────────────────────────────────────►│          
-              │                 │           │                  │          
+    ┌────────────────────┐    ┌──────┐    ┌──────┐    ┌────────────────────┐
+    │ClassAHasALongNameAs│    │ClassB│    │ClassD│    │ClassCNameSuperLongL│
+    │WellAndLongerLongerL│    └──────┘    └──────┘    │ongLongLongLongLongL│
+    │onger               │       │           │        │ongLongLongLongLongL│
+    └────────────────────┘       │           │        │ong                 │
+              │                  │           │        └────────────────────┘
+              │                  │           │                  │           
+ func_1       │                  │           │                  │           
+─────────────►│                  │           │                  │           
+              │                  │           │                  │           
+              │ func_2_with_a_v  │           │                  │           
+              │ ery_long_name    │           │                  │           
+              │─────────────────►│           │                  │           
+              │                  │           │                  │           
+              │                  │ func_4    │                  │           
+              │                  │──────────►│                  │           
+              │                  │           │                  │           
+              │ func_3_long_name_cross_life_lines               │           
+              │────────────────────────────────────────────────►│           
+              │                  │           │                  │           

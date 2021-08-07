@@ -22,7 +22,6 @@ impl CallGraph {
 
         let mut function_stack: Vec<(String, usize)> = Vec::new();
         let mut last_component = String::new();
-        let mut last_function = String::new();
         let mut last_depth = 0;
         for line in callgraph.split('\n') {
             let parts: Vec<&str> = line.split("::").collect();
@@ -32,7 +31,6 @@ impl CallGraph {
 
             let mut curr_component = parts[0].to_string();
             curr_component.retain(|c: char| !c.is_whitespace());
-            println!("{}", curr_component);
             let mut curr_func_call = parts.get(1).unwrap_or(&"").to_string();
             curr_func_call.retain(|c: char| !c.is_whitespace());
 
@@ -57,7 +55,6 @@ impl CallGraph {
             }
 
             last_component = curr_component;
-            last_function = curr_func_call;
             last_depth = non_space_pos;
         }
 
