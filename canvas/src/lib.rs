@@ -65,7 +65,12 @@ impl Canvas {
         self.change_pixel(vertex, c);
     }
 
-    fn draw_line_overwrite_or_not(&mut self, a: &Vertex, b: &Vertex, overwrite: bool) -> Line {
+    fn draw_line_overwrite_or_not(
+        &mut self,
+        a: &Vertex,
+        b: &Vertex,
+        overwrite: bool,
+    ) -> Line {
         if a.1 != b.1 {
             for j in (min(a.1, b.1) + 1)..(max(a.1, b.1)) {
                 if self.buffer[a.0][j] == ' ' || overwrite {
@@ -169,7 +174,11 @@ impl Canvas {
         }
     }
 
-    pub fn draw_rectangle_with_vertices_label(&mut self, vertices: &[Vertex], label: &str) {
+    pub fn draw_rectangle_with_vertices_label(
+        &mut self,
+        vertices: &[Vertex],
+        label: &str,
+    ) {
         let rec = self.rec_from_vertices(vertices);
         self.write_label_within_rec(&rec, label);
     }
@@ -309,8 +318,18 @@ mod test {
     #[test]
     fn test_line_with_label() {
         let mut canvas = Canvas::new(20, 20);
-        canvas.draw_line_with_label((10, 10), (10, 18), "func_call_name", true);
-        canvas.draw_line_with_label((15, 10), (15, 18), "func_call_name", false);
+        canvas.draw_line_with_label(
+            (10, 10),
+            (10, 18),
+            "func_call_name",
+            true,
+        );
+        canvas.draw_line_with_label(
+            (15, 10),
+            (15, 18),
+            "func_call_name",
+            false,
+        );
         canvas.reset_boundary();
         let res = fs::read_to_string("./test/line_with_label.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
@@ -326,7 +345,8 @@ mod test {
             false,
         );
         canvas.reset_boundary();
-        let res = fs::read_to_string("./test/line_with_long_label.txt").unwrap();
+        let res =
+            fs::read_to_string("./test/line_with_long_label.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
     }
 }

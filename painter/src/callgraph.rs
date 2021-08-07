@@ -36,7 +36,8 @@ impl CallGraph {
 
             ret.add_component_func(&curr_component, &curr_func_call);
 
-            let non_space_pos = line.find(|c: char| !c.is_whitespace()).unwrap_or(0);
+            let non_space_pos =
+                line.find(|c: char| !c.is_whitespace()).unwrap_or(0);
             if non_space_pos > last_depth && !last_component.is_empty() {
                 function_stack.push((last_component, last_depth));
             } else if non_space_pos < last_depth {
@@ -83,7 +84,8 @@ mod test {
 
     #[test]
     fn test_empty_func() {
-        let txt = fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
+        let txt =
+            fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
 
         let callgraph = CallGraph::new(&txt);
 
@@ -109,8 +111,8 @@ mod test {
         assert_eq!(func_calls.len(), callgraph.func_calls.len());
         for i in 0..func_calls.len() {
             assert_eq!(func_calls[i].0, callgraph.func_calls[i].0);
-            assert_eq!(func_calls[i].1.0, callgraph.func_calls[i].1.0);
-            assert_eq!(func_calls[i].1.1, callgraph.func_calls[i].1.1);
+            assert_eq!(func_calls[i].1 .0, callgraph.func_calls[i].1 .0);
+            assert_eq!(func_calls[i].1 .1, callgraph.func_calls[i].1 .1);
         }
     }
 }

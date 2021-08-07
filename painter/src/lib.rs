@@ -56,7 +56,8 @@ impl Painter {
         let func = f.1.to_owned();
 
         let called_rec = self.components.get(&func.0).unwrap();
-        let calling_rec = self.components.get(&component).unwrap_or(&virtual_rec);
+        let calling_rec =
+            self.components.get(&component).unwrap_or(&virtual_rec);
 
         let calling_center = (calling_rec.left + calling_rec.right) / 2;
         let mut called_center = (called_rec.left + called_rec.right) / 2;
@@ -69,20 +70,16 @@ impl Painter {
         }
 
         let label_height = (func.1.len() - 1)
-            / (max(called_center, calling_center) - min(called_center, calling_center) - 1)
+            / (max(called_center, calling_center)
+                - min(called_center, calling_center)
+                - 1)
             + 1;
 
         bottom_boundary += EXTRA_VERTICAL_MARGIN;
 
         canvas.draw_line_with_label(
-            (
-                bottom_boundary + label_height,
-                calling_center,
-            ),
-            (
-                bottom_boundary + label_height,
-                called_center,
-            ),
+            (bottom_boundary + label_height, calling_center),
+            (bottom_boundary + label_height, called_center),
             &func.1,
             true,
         );
@@ -106,23 +103,18 @@ impl Painter {
 
         canvas.draw_line(
             &(bottom_boundary, called_center),
-            &(
-                bottom_boundary,
-                called_center + DEFAULT_SELF_CALL_WIDTH,
-            ),
+            &(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH),
         );
 
-        canvas.draw_point(&(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH), '┐');
+        canvas.draw_point(
+            &(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH),
+            '┐',
+        );
 
-        let label_height = (func.1.len() - 1)
-            / (DEFAULT_SELF_CALL_WIDTH)
-            + 1;
+        let label_height = (func.1.len() - 1) / (DEFAULT_SELF_CALL_WIDTH) + 1;
 
         canvas.draw_line_with_label(
-            (
-                bottom_boundary,
-                called_center + DEFAULT_SELF_CALL_WIDTH,
-            ),
+            (bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH),
             (
                 bottom_boundary + label_height + 2,
                 called_center + DEFAULT_SELF_CALL_WIDTH,
@@ -134,19 +126,23 @@ impl Painter {
         bottom_boundary += label_height + 2;
 
         canvas.draw_arrowed_line(
-            &(
-                bottom_boundary,
-                called_center + DEFAULT_SELF_CALL_WIDTH,
-            ),
+            &(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH),
             &(bottom_boundary, called_center + 1),
         );
 
-        canvas.draw_point(&(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH), '┘');
+        canvas.draw_point(
+            &(bottom_boundary, called_center + DEFAULT_SELF_CALL_WIDTH),
+            '┘',
+        );
 
         bottom_boundary
     }
 
-    fn draw_function_calls(&self, canvas: &mut Canvas, callgraph: &CallGraph) -> usize {
+    fn draw_function_calls(
+        &self,
+        canvas: &mut Canvas,
+        callgraph: &CallGraph,
+    ) -> usize {
         let mut bottom_boundary = 0;
         for (_component_label, rec) in &self.components {
             bottom_boundary = max(bottom_boundary, rec.bottom);
@@ -154,9 +150,11 @@ impl Painter {
 
         for f in &callgraph.func_calls {
             if !f.0.eq(&f.1 .0) {
-                bottom_boundary = self.draw_cross_component_call(canvas, f, bottom_boundary);
+                bottom_boundary =
+                    self.draw_cross_component_call(canvas, f, bottom_boundary);
             } else {
-                bottom_boundary = self.draw_same_component_call(canvas, f, bottom_boundary);
+                bottom_boundary =
+                    self.draw_same_component_call(canvas, f, bottom_boundary);
             }
         }
         // return the expected bottom of the lifecycle line
@@ -185,9 +183,9 @@ impl Painter {
 
 #[cfg(test)]
 mod test {
-    use std::fs;
-    use canvas::Canvas;
     use super::*;
+    use canvas::Canvas;
+    use std::fs;
 
     #[test]
     fn test_callgraph() {
@@ -207,7 +205,8 @@ mod test {
 
     #[test]
     fn test_callgraph_self_call() {
-        let txt = fs::read_to_string("./test/callgraph_self_call.txt").unwrap();
+        let txt =
+            fs::read_to_string("./test/callgraph_self_call.txt").unwrap();
 
         let mut canvas = Canvas::new(500, 500);
 
@@ -217,13 +216,15 @@ mod test {
 
         canvas.reset_boundary();
         canvas.print();
-        let res = fs::read_to_string("./test/callgraph_self_call_res.txt").unwrap();
+        let res =
+            fs::read_to_string("./test/callgraph_self_call_res.txt").unwrap();
         assert_eq!(canvas.to_string(), res);
     }
 
     #[test]
     fn test_callgraph_multi_section() {
-        let txt = fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
+        let txt =
+            fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
 
         let mut canvas = Canvas::new(500, 500);
 
@@ -233,7 +234,8 @@ mod test {
 
         canvas.reset_boundary();
         canvas.print();
-        let res = fs::read_to_string("./test/callgraph_multi_section_res.txt").unwrap();
+        let res = fs::read_to_string("./test/callgraph_multi_section_res.txt")
+            .unwrap();
         assert_eq!(canvas.to_string(), res);
     }
 }
