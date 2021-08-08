@@ -55,4 +55,13 @@ to UML sequence:
 cat ./painter/test/callgraph.txt | cargo run
 cargo build --release
 cat ./painter/test/callgraph.txt | ./target/release/ascii_painter
+
+# install (from repo dir)
+cargo install --path ./ascii_painter
 ```
+
+## Demo
+
+After installing ascii\_painter, callgraph text in vim can be turned to graph as demonstrated below:
+
+![vim demo](./examples/vim_demo.gif)
