@@ -1,8 +1,8 @@
 ASCII Painter
 =============
 
-It's work-in-progress. Inspired by asciiflow.com, this tool converts callgraph
-text into ascii text-based graph.
+Inspired by asciiflow.com, this tool converts callgraph text into ascii
+text-based UML sequence diagram.
 
 Check out [todo](todo.md) for implementation progress and plan.
 

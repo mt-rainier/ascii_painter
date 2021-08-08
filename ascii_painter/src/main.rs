@@ -1,3 +1,5 @@
+//! This crate is the main entry of ascii_painter. It processes command parameters and generates
+//! callgraph diagram using [`Painter`] and [`Canvas`].
 use canvas::Canvas;
 use painter::Painter;
 use std::io::{self, Read};
@@ -10,6 +12,7 @@ pub fn is_tty_stdin() -> bool {
     atty::is(atty::Stream::Stdin)
 }
 
+/// Command-line parameter structure for ascii_painter.
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "ascii_painter",
@@ -25,6 +28,7 @@ struct Opt {
     output: Option<PathBuf>,
 }
 
+/// Main entry of ascii_painter program.
 fn main() -> io::Result<()> {
     let opt = Opt::from_args();
 
@@ -48,7 +52,7 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
-    let mut canvas = Canvas::new(500, 500);
+    let mut canvas = Canvas::new(10000, 10000);
 
     let mut painter = Painter::new();
 

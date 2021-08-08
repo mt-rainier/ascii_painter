@@ -1,8 +1,12 @@
+//! This crate includes [`Canvas`] type, which provides basic drawing methods for [`Rectangle`] and
+//! [`Line`], with label or not.
+
 use std::cmp::{max, min};
 use std::{mem, str};
 
 type Vertex = (usize, usize);
 
+/// Defines a rectangle with four boundaries.
 #[derive(Debug)]
 pub struct Rectangle {
     pub left: usize,
@@ -11,16 +15,19 @@ pub struct Rectangle {
     pub bottom: usize,
 }
 
+/// Defines a line with start/end vertices.
 #[allow(dead_code)]
 pub struct Line {
     start: Vertex,
     end: Vertex,
 }
 
+/// Defines a paint canvas.
 pub struct Canvas {
     width: usize,
     height: usize,
     buffer: Vec<Vec<char>>,
+    /// boundary of the canvas with surrounding empty space cropped.
     boundary: Rectangle,
 }
 
@@ -188,6 +195,8 @@ impl Canvas {
         self.write_label_within_rec(rec, label);
     }
 
+    /// Draws a line from `a` to `b` with a horizontal label. An arrow is added at the end vertex
+    /// `b` if `arrowed == true`.
     pub fn draw_line_with_label(
         &mut self,
         mut a: Vertex,
@@ -226,6 +235,7 @@ impl Canvas {
         }
     }
 
+    /// Resets boundary to crop the surrounding empty space.
     pub fn reset_boundary(&mut self) {
         for i in 0..self.height {
             let mut empty_line = true;

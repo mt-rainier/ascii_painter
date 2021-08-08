@@ -1,13 +1,18 @@
+//! This crate includes [`Painter`] type, which processes callgraph text and draw UML sequence
+//! diagram using [`Canvas`].
+
 use canvas::*;
 use std::{
     cmp::{max, min},
     collections::HashMap,
 };
 
-mod callgraph;
+pub mod callgraph;
 use callgraph::{CallGraph, FunctionCall};
 
+/// A translation layer from [`CallGraph`] to drawing on [`Canvas`].
 pub struct Painter {
+    /// Map between component identifier to its [`Rectangle`]
     components: HashMap<String, Rectangle>,
 }
 
@@ -21,6 +26,7 @@ impl Painter {
         }
     }
 
+    /// Draws all the component rectangles on the `canvas`
     fn draw_components(&mut self, canvas: &mut Canvas, callgraph: &CallGraph) {
         let mut right_boundary = 0;
         let max_rec_width = 20;

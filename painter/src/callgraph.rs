@@ -1,3 +1,5 @@
+//! This module includes the [`CallGraph`] type, which contains the structured information of the
+//! callgraph.
 use std::collections::{HashMap, HashSet};
 
 /// Component and its function name
@@ -5,14 +7,19 @@ type Function = (String, String);
 /// Component and the function it's calling
 pub type FunctionCall = (String, Function);
 
+/// A structure of callgraph information.
 #[derive(Debug)]
 pub struct CallGraph {
+    /// A map between component identifier to its function set.
     pub components: HashMap<String, HashSet<String>>,
+    /// A vec of component identifiers ordered by their occurence.
     pub components_in_order: Vec<String>,
+    /// A vec of function calls ([`FunctionCall`]) by their occurence.
     pub func_calls: Vec<FunctionCall>,
 }
 
 impl CallGraph {
+    /// Processes `callgraph` text and generates [`CallGraph`]
     pub fn new(callgraph: &str) -> Self {
         let mut ret = CallGraph {
             components: HashMap::new(),
