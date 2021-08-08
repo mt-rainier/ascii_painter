@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 canvas = { path = "../canvas" }
 painter = { path = "../painter" }
+structopt = "0.3"
+atty = "0.2"
+
