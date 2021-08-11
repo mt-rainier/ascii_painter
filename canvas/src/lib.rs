@@ -216,7 +216,10 @@ impl Canvas {
             let label_rec = Rectangle {
                 left: a.1 + 1,
                 right: b.1 - 1,
-                top: a.0 - 1 - (label.len() - 1) / (b.1 - a.1 - 3) - 1,
+                top: a.0
+                    - 1
+                    - (label.len() - 1) / (b.1 - 1 - (a.1 + 1) - 1)
+                    - 1,
                 bottom: a.0,
             };
             self.write_label_within_rec(&label_rec, label);

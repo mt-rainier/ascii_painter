@@ -229,19 +229,37 @@ mod test {
 
     #[test]
     fn test_callgraph_multi_section() {
-        let txt =
-            fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
+        {
+            let txt =
+                fs::read_to_string("./test/callgraph_multi_section.txt").unwrap();
 
-        let mut canvas = Canvas::new(500, 500);
+            let mut canvas = Canvas::new(500, 500);
 
-        let mut painter = Painter::new();
+            let mut painter = Painter::new();
 
-        painter.draw(&mut canvas, &txt);
+            painter.draw(&mut canvas, &txt);
 
-        canvas.reset_boundary();
-        canvas.print();
-        let res = fs::read_to_string("./test/callgraph_multi_section_res.txt")
-            .unwrap();
-        assert_eq!(canvas.to_string(), res);
+            canvas.reset_boundary();
+            canvas.print();
+            let res = fs::read_to_string("./test/callgraph_multi_section_res.txt")
+                .unwrap();
+            assert_eq!(canvas.to_string(), res);
+        }
+        {
+            let txt =
+                fs::read_to_string("./test/callgraph_multi_section_2.txt").unwrap();
+
+            let mut canvas = Canvas::new(500, 500);
+
+            let mut painter = Painter::new();
+
+            painter.draw(&mut canvas, &txt);
+
+            canvas.reset_boundary();
+            canvas.print();
+            let res = fs::read_to_string("./test/callgraph_multi_section_2_res.txt")
+                .unwrap();
+            assert_eq!(canvas.to_string(), res);
+        }
     }
 }

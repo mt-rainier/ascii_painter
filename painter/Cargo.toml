@@ -8,3 +8,11 @@ edition = "2018"
 
 [dependencies]
 canvas = { path = "../canvas" }
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
+

@@ -73,11 +73,11 @@ impl CallGraph {
         if !component.is_empty() && !self.components.contains_key(component) {
             self.components_in_order.push(component.to_string());
         }
+        let set = self
+            .components
+            .entry(component.to_owned())
+            .or_insert(HashSet::new());
         if !func.is_empty() {
-            let set = self
-                .components
-                .entry(component.to_owned())
-                .or_insert(HashSet::new());
             set.insert(func.to_owned());
         }
     }
@@ -114,6 +114,67 @@ mod test {
             ("ClassB", ("ClassB", "func_4")),
             ("ClassA", ("ClassB", "func_2")),
             ("ClassC", ("ClassB", "func_3")),
+        ];
+        assert_eq!(func_calls.len(), callgraph.func_calls.len());
+        for i in 0..func_calls.len() {
+            assert_eq!(func_calls[i].0, callgraph.func_calls[i].0);
+            assert_eq!(func_calls[i].1 .0, callgraph.func_calls[i].1 .0);
+            assert_eq!(func_calls[i].1 .1, callgraph.func_calls[i].1 .1);
+        }
+    }
+
+    #[test]
+    fn test_multi_section() {
+        let txt = fs::read_to_string("./test/callgraph_multi_section_2.txt")
+            .unwrap();
+
+        let callgraph = CallGraph::new(&txt);
+
+        println!("{:?}", callgraph);
+
+        let a_func = callgraph.components.get("ClassA").unwrap();
+        assert!(a_func.contains("func_1"));
+        let b_func = callgraph.components.get("ClassB").unwrap();
+        assert!(b_func.contains("func_4"));
+        assert!(b_func.contains("func_2"));
+        assert!(b_func.contains("func_3"));
+        let d_func = callgraph.components.get("ClassD").unwrap();
+        assert!(d_func.contains("func_1"));
+        let e_func = callgraph.components.get("ClassE").unwrap();
+        assert!(e_func.contains("func_4"));
+        assert!(e_func.contains("func_2"));
+        assert!(e_func.contains("func_3"));
+
+        assert_eq!(callgraph.components_in_order[0], "ClassA");
+        assert_eq!(callgraph.components_in_order[1], "ClassB");
+        assert_eq!(callgraph.components_in_order[2], "ClassC");
+        assert_eq!(callgraph.components_in_order[3], "ClassD");
+        assert_eq!(callgraph.components_in_order[4], "ClassE");
+
+        let func_calls = [
+            ("ClassA", ("ClassB", "func_2")),
+            ("ClassB", ("ClassB", "func_3")),
+            ("ClassB", ("ClassB", "func_4")),
+            ("ClassA", ("ClassB", "func_2")),
+            ("ClassC", ("ClassB", "func_3")),
+            ("", ("ClassD", "func_1")),
+            ("ClassD", ("ClassE", "func_2")),
+            ("ClassE", ("ClassE", "func_3")),
+            ("ClassE", ("ClassE", "func_4")),
+            ("ClassD", ("ClassE", "func_2")),
+            ("ClassF", ("ClassE", "func_3")),
+            ("", ("ClassA", "func_1")),
+            ("ClassA", ("ClassB", "func_2")),
+            ("ClassB", ("ClassB", "func_3")),
+            ("ClassB", ("ClassB", "func_4")),
+            ("ClassA", ("ClassB", "func_2")),
+            ("ClassC", ("ClassB", "func_3")),
+            ("", ("ClassD", "func_1")),
+            ("ClassD", ("ClassE", "func_2")),
+            ("ClassE", ("ClassE", "func_3")),
+            ("ClassE", ("ClassE", "func_4")),
+            ("ClassD", ("ClassE", "func_2")),
+            ("ClassF", ("ClassE", "func_3")),
         ];
         assert_eq!(func_calls.len(), callgraph.func_calls.len());
         for i in 0..func_calls.len() {
